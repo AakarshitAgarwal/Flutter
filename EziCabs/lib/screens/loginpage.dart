@@ -1,7 +1,7 @@
 // import 'package:connectivity/connectivity.dart';
 import 'package:EziCabs/brand_colors.dart';
 // import 'package:ezi_cabs/screens/mainpage.dart';
-// import 'package:ezi_cabs/screens/registrationpage.dart';
+import 'package:EziCabs/screens/registrationpage.dart';
 // import 'package:ezi_cabs/widgets/ProgressDialog.dart';
 import 'package:EziCabs/widgets/TaxiButton.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
@@ -9,8 +9,9 @@ import 'package:EziCabs/widgets/TaxiButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+//for routing
 class LoginPage extends StatelessWidget {
-  // static const String id = 'login';
+  static const String id = 'login';
 
   @override
 //   _LoginPageState createState() => _LoginPageState();
@@ -170,7 +171,8 @@ class LoginPage extends StatelessWidget {
                 ),
                 FlatButton(
                   onPressed: () {
-                    // Navigator.pushNamedAndRemoveUntil(context, RegistrationPage.id, (route) => false);
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, RegistrationPage.id, (route) => false);
                   },
                   child: Text(
                     'Don\'t have an account, sign up here',

@@ -14,13 +14,13 @@ class TaxiButton extends StatelessWidget {
       onPressed: onPressed,
       shape: new RoundedRectangleBorder(
           borderRadius: new BorderRadius.circular(25)),
-      color: Colors.yellow,
+      color: color,
       textColor: Colors.white, //doubt
       child: Container(
         height: 50.0,
         child: Center(
           child: Text(
-            'LOGIN',
+            title,
             style: TextStyle(
                 fontSize: 18, fontFamily: 'Brand-Bold', color: Colors.white),
           ),
