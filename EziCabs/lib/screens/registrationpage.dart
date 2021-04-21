@@ -1,13 +1,13 @@
-// import 'package:connectivity/connectivity.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:EziCabs/brand_colors.dart';
 import 'package:EziCabs/screens/loginpage.dart';
 // import 'package:ezi_cabs/widgets/ProgressDialog.dart';
 import 'package:EziCabs/widgets/TaxiButton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:ezi_cabs/screens/mainpage.dart';
+import 'package:EziCabs/screens/mainpage.dart';
 
 //for routing
 class RegistrationPage extends StatefulWidget {
@@ -50,36 +50,35 @@ class _RegistrationPageState extends State<RegistrationPage> {
     //   builder: (BuildContext context) => ProgressDialog(status: 'Registering...',),
     // );
 
-    // final User user = (await _auth
-    //         .createUserWithEmailAndPassword(
-    //   email: emailController.text,
-    //   password: passwordController.text,
-    // )
-    //         .catchError((ex) {
-    //   // check error and display message
-    //   Navigator.pop(context);
-    //   PlatformException thisEx = ex;
-    //   showSnackBar(thisEx.message);
-    // }))
-    //     .user;
+    final User user = (await _auth
+            .createUserWithEmailAndPassword(
+      email: emailController.text,
+      password: passwordController.text,
+    )
+            .catchError((ex) {
+      // check error and display message
+      Navigator.pop(context);
+      PlatformException thisEx = ex;
+      showSnackBar(thisEx.message);
+    }))
+        .user;
 
-    // final FirebaseUser user
+    Navigator.pop(context);
+    if (user != null) {
+      DatabaseReference newUserRef =
+          FirebaseDatabase.instance.reference().child('users/${user.uid}');
 
-    //   Navigator.pop(context);
-    //if (user != null) {
-    //DatabaseReference newUserRef = FirebaseDatabase.instance.reference().child('users/${user.uid}');
+      // Prepare data to be saved
+      Map userMap = {
+        'fullname': fullNameController.text,
+        'email': emailController.text,
+        'phone': phoneController.text,
+      };
 
-    // Prepare data to be saved
-    // Map userMap = {
-    //   'fullname': fullNameController.text,
-    //   'email': emailController.text,
-    //   'phone': phoneController.text,
-    // };
+      newUserRef.set(userMap);
 
-    //  newUserRef.set(userMap);
-
-    // Navigator.pushNamedAndRemoveUntil(context, MainPage.id, (route) => false);
-    // }
+      Navigator.pushNamedAndRemoveUntil(context, MainPage.id, (route) => false);
+    }
 
     try {
       UserCredential userCredential =
@@ -227,13 +226,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         title: 'REGISTER',
                         color: BrandColors.colorMustard,
                         onPressed: () async {
-                          // var connectivityResult =
-                          //     await Connectivity().checkConnectivity();
-                          // if (connectivityResult != ConnectivityResult.mobile &&
-                          //     connectivityResult != ConnectivityResult.wifi) {
-                          //   showSnackBar('No Internet connectivity');
-                          //   return;
-                          // }
+                          var connectivityResult =
+                              await Connectivity().checkConnectivity();
+                          if (connectivityResult != ConnectivityResult.mobile &&
+                              connectivityResult != ConnectivityResult.wifi) {
+                            showSnackBar('No Internet connectivity');
+                            return;
+                          }
 
                           if (fullNameController.text.length < 3) {
                             showSnackBar('Please provide a valid Full Name');
