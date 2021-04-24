@@ -1,7 +1,7 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:EziCabs/brand_colors.dart';
 import 'package:EziCabs/screens/loginpage.dart';
-// import 'package:ezi_cabs/widgets/ProgressDialog.dart';
+import 'package:EziCabs/widgets/ProgressDialog.dart';
 import 'package:EziCabs/widgets/TaxiButton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -44,11 +44,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
   var passwordController = TextEditingController();
 
   void registerUser() async {
-    // showDialog(
-    //   barrierDismissible: false,
-    //   context: context,
-    //   builder: (BuildContext context) => ProgressDialog(status: 'Registering...',),
-    // );
+    //show please wait dialog
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => ProgressDialog(
+        status: 'Registering...',
+      ),
+    );
 
     final User user = (await _auth
             .createUserWithEmailAndPassword(
@@ -63,7 +66,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     }))
         .user;
 
-    Navigator.pop(context);
+    Navigator.pop(context); //if login is successful
     if (user != null) {
       DatabaseReference newUserRef =
           FirebaseDatabase.instance.reference().child('users/${user.uid}');

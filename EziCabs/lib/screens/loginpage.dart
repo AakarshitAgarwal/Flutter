@@ -48,13 +48,14 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
+    //check for errors and display messages
     final User user = (await _auth
             .signInWithEmailAndPassword(
       email: emailController.text,
       password: passwordController.text,
     )
             .catchError((ex) {
-      // Navigator.pop(context);
+      Navigator.pop(context);
       PlatformException thisEx = ex;
       showSnackBar(thisEx.message);
     }))
@@ -66,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
           FirebaseDatabase.instance.reference().child('users/${user.uid}');
       userRef.once().then((DataSnapshot snapshot) {
         if (snapshot.value != null) {
-          // Navigator.pop(context);
+          Navigator.pop(context);
           Navigator.pushNamedAndRemoveUntil(
               context, MainPage.id, (route) => false);
         }
