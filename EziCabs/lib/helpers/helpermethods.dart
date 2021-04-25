@@ -2,8 +2,8 @@
 // import 'dart:math';
 
 import 'package:EziCabs/datamodels/address.dart';
-// import 'package:cab_rider/datamodels/directiondetails.dart';
-// import 'package:cab_rider/datamodels/user.dart';
+import 'package:EziCabs/datamodels/directiondetails.dart';
+// import 'package:EziCabs/datamodels/user.dart';
 import 'package:EziCabs/dataprovider/appdata.dart';
 import 'package:EziCabs/globalvariable.dart';
 import 'package:EziCabs/helpers/requesthelper.dart';
@@ -11,8 +11,8 @@ import 'package:connectivity/connectivity.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:http/http.dart' as http;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class HelperMethods {
@@ -62,28 +62,34 @@ class HelperMethods {
     return placeAddress;
   }
 
-//   static Future<DirectionDetails> getDirectionDetails(LatLng startPosition, LatLng endPosition) async {
+  static Future<DirectionDetails> getDirectionDetails(
+      LatLng startPosition, LatLng endPosition) async {
+    String url =
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${startPosition.latitude},${startPosition.longitude}&destination=${endPosition.latitude},${endPosition.longitude}&mode=driving&key=$mapKey';
 
-//    String url = 'https://maps.googleapis.com/maps/api/directions/json?origin=${startPosition.latitude},${startPosition.longitude}&destination=${endPosition.latitude},${endPosition.longitude}&mode=driving&key=$mapKey';
+    var response = await RequestHelper.getRequest(url);
 
-//    var response = await RequestHelper.getRequest(url);
+    if (response == 'failed') {
+      return null;
+    }
 
-//    if(response == 'failed'){
-//      return null;
-//    }
+    DirectionDetails directionDetails = DirectionDetails();
 
-//    DirectionDetails directionDetails = DirectionDetails();
+    directionDetails.durationText =
+        response['routes'][0]['legs'][0]['duration']['text'];
+    directionDetails.durationValue =
+        response['routes'][0]['legs'][0]['duration']['value'];
 
-//    directionDetails.durationText = response['routes'][0]['legs'][0]['duration']['text'];
-//    directionDetails.durationValue = response['routes'][0]['legs'][0]['duration']['value'];
+    directionDetails.distanceText =
+        response['routes'][0]['legs'][0]['distance']['text'];
+    directionDetails.distanceValue =
+        response['routes'][0]['legs'][0]['distance']['value'];
 
-//    directionDetails.distanceText = response['routes'][0]['legs'][0]['distance']['text'];
-//    directionDetails.distanceValue = response['routes'][0]['legs'][0]['distance']['value'];
+    directionDetails.encodedPoints =
+        response['routes'][0]['overview_polyline']['points'];
 
-//    directionDetails.encodedPoints = response['routes'][0]['overview_polyline']['points'];
-
-//    return directionDetails;
-//   }
+    return directionDetails;
+  }
 
 //   static int estimateFares (DirectionDetails details){
 //    // per km = $0.3,
