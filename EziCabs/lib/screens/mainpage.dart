@@ -550,7 +550,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                 // ),
                                 Text(
                                   (tripDirectionDetails != null)
-                                      ? '\$${HelperMethods.estimateFares(tripDirectionDetails)}'
+                                      ? '\₹${HelperMethods.estimateFares(tripDirectionDetails)}'
                                       : '',
                                   style: TextStyle(
                                       fontSize: 18, fontFamily: 'Brand-Bold'),
@@ -667,8 +667,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         ),
                         GestureDetector(
                           onTap: () {
-                            // cancelRequest();
-                            // resetApp();
+                            cancelRequest();
+                            resetApp();
                           },
                           child: Container(
                             height: 50,
@@ -883,6 +883,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
     rideRef.set(rideMap);
   }
+
+  void cancelRequest() {
+    rideRef.remove();
+
+    setState(() {
+      // appState = 'NORMAL';
+    });
+  }
+
   // rideSubscription = rideRef.onValue.listen((event) async {
   //   //check for null snapshot
   //   if (event.snapshot.value == null) {
@@ -1099,13 +1108,6 @@ void startGeofireListener() {
 
   }
 
-  void cancelRequest(){
-    rideRef.remove();
-
-    setState(() {
-      appState = 'NORMAL';
-    });
-  }
 
 
 

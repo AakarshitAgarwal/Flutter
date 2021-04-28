@@ -43,11 +43,11 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         //Routes
-        // initialRoute: RegistrationPage.id,
-        initialRoute: MainPage.id,
+        initialRoute: RegistrationPage.id,
+        // initialRoute: MainPage.id,
         // initialRoute: SearchPage.id,
         routes: {
-          // SearchPage.id: (context) => SearchPage(),
+          SearchPage.id: (context) => SearchPage(),
           RegistrationPage.id: (context) => RegistrationPage(),
           LoginPage.id: (context) => LoginPage(),
           MainPage.id: (context) => MainPage(),
