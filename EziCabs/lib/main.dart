@@ -2,6 +2,7 @@ import 'package:EziCabs/screens/loginpage.dart';
 import 'package:EziCabs/screens/mainpage.dart';
 import 'package:EziCabs/dataprovider/appdata.dart';
 import 'package:EziCabs/screens/registrationpage.dart';
+import 'package:EziCabs/screens/searchpage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:io';
@@ -42,8 +43,11 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         //Routes
+        // initialRoute: RegistrationPage.id,
         initialRoute: MainPage.id,
+        // initialRoute: SearchPage.id,
         routes: {
+          // SearchPage.id: (context) => SearchPage(),
           RegistrationPage.id: (context) => RegistrationPage(),
           LoginPage.id: (context) => LoginPage(),
           MainPage.id: (context) => MainPage(),
