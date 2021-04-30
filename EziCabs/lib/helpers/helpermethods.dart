@@ -105,13 +105,12 @@ class HelperMethods {
     return totalFare.truncate();
   }
 
-//   static double generateRandomNumber(int max){
+  static double generateRandomNumber(int max) {
+    var randomGenerator = Random();
+    int randInt = randomGenerator.nextInt(max);
 
-//     var randomGenerator = Random();
-//     int randInt = randomGenerator.nextInt(max);
-
-//     return randInt.toDouble();
-//   }
+    return randInt.toDouble();
+  }
 
 //   static sendNotification(String token, context, String ride_id) async {
 

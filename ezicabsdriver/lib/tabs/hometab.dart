@@ -4,11 +4,11 @@ import 'package:ezicabsdriver/brand_colors.dart';
 // import 'package:ezicabsdriver/datamodels/driver.dart';
 import 'package:ezicabsdriver/globalvariabels.dart';
 // import 'package:ezicabsdriver/helpers/helpermethods.dart';
-// import 'package:ezicabsdriver/helpers/pushnotificationservice.dart';
+import 'package:ezicabsdriver/helpers/pushnotificationservice.dart';
 import 'package:ezicabsdriver/widgets/AvailabilityButton.dart';
 import 'package:ezicabsdriver/widgets/ConfirmSheet.dart';
-// import 'package:ezicabsdriver/widgets/NotificationDialog.dart';
-// import 'package:ezicabsdriver/widgets/TaxiButton.dart';
+import 'package:ezicabsdriver/widgets/NotificationDialog.dart';
+import 'package:ezicabsdriver/widgets/TaxiButton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -46,33 +46,32 @@ class _HomeTabState extends State<HomeTab> {
     mapController.animateCamera(CameraUpdate.newLatLng(pos));
   }
 
-//   void getCurrentDriverInfo () async {
+  void getCurrentDriverInfo() async {
+    currentFirebaseUser = await FirebaseAuth.instance.currentUser;
+    // DatabaseReference driverRef = FirebaseDatabase.instance
+    //     .reference()
+    //     .child('drivers/${currentFirebaseUser.uid}');
+    // driverRef.once().then((DataSnapshot snapshot) {
+    //   if (snapshot.value != null) {
+    //     currentDriverInfo = Driver.fromSnapshot(snapshot);
+    //     print(currentDriverInfo.fullName);
+    //   }
+    // });
 
-//     currentFirebaseUser = await FirebaseAuth.instance.currentUser();
-//     DatabaseReference driverRef = FirebaseDatabase.instance.reference().child('drivers/${currentFirebaseUser.uid}');
-//     driverRef.once().then((DataSnapshot snapshot){
+    PushNotificationService pushNotificationService = PushNotificationService();
 
-//       if(snapshot.value != null){
-//         currentDriverInfo = Driver.fromSnapshot(snapshot);
-//         print(currentDriverInfo.fullName);
-//       }
+    pushNotificationService.initialize(context);
+    pushNotificationService.getToken();
 
-//     });
+    // HelperMethods.getHistoryInfo(context);
+  }
 
-//     PushNotificationService pushNotificationService = PushNotificationService();
-
-//     pushNotificationService.initialize(context);
-//     pushNotificationService.getToken();
-
-//     HelperMethods.getHistoryInfo(context);
-//   }
-
-//   @override
-//   void initState() {
-//     // TODO: implement initState
-//     super.initState();
-//     getCurrentDriverInfo();
-//   }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCurrentDriverInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +106,11 @@ class _HomeTabState extends State<HomeTab> {
                 title: availabilityTitle,
                 color: availabilityColor,
                 onPressed: () {
+                  // showDialog(
+                  //   context: context,
+                  //   barrierDismissible: false,
+                  //   builder: (BuildContext context) => NotificationDialog(),
+                  // );
                   showModalBottomSheet(
                     isDismissible: false,
                     context: context,
@@ -146,50 +150,44 @@ class _HomeTabState extends State<HomeTab> {
       ],
     );
   }
-}
 
-void GoOnline() {
-  Geofire.initialize('driversAvailable');
-  Geofire.setLocation(currentFirebaseUser.uid, currentPosition.latitude,
-      currentPosition.longitude);
+  void GoOnline() {
+    Geofire.initialize('driversAvailable');
+    Geofire.setLocation(currentFirebaseUser.uid, currentPosition.latitude,
+        currentPosition.longitude);
 
-  tripRequestRef = FirebaseDatabase.instance
-      .reference()
-      .child('drivers/${currentFirebaseUser.uid}/newtrip');
-  tripRequestRef.set('waiting');
+    tripRequestRef = FirebaseDatabase.instance
+        .reference()
+        .child('drivers/${currentFirebaseUser.uid}/newtrip');
+    tripRequestRef.set('waiting');
 
-  tripRequestRef.onValue.listen((event) {});
-}
+    tripRequestRef.onValue.listen((event) {});
+  }
 
-void GoOffline() {
-  Geofire.removeLocation(currentFirebaseUser.uid);
-  tripRequestRef.onDisconnect();
-  tripRequestRef.remove();
-  tripRequestRef = null;
-}
+  void GoOffline() {
+    Geofire.removeLocation(currentFirebaseUser.uid);
+    tripRequestRef.onDisconnect();
+    tripRequestRef.remove();
+    tripRequestRef = null;
+  }
 
-//  Geolocator geolocator = Geolocator();
-//   var locationOptions = LocationOptions(
-//       accuracy: LocationAccuracy.bestForNavigation, distanceFilter: 4);
-void getLocationUpdates() {
-  StreamSubscription<Position> homeTabPostionStream;
-  homeTabPostionStream = Geolocator.getPositionStream(
-          desiredAccuracy: LocationAccuracy.bestForNavigation,
-          distanceFilter: 4)
-      .listen((Position position) {
-    currentPosition = position;
+  void getLocationUpdates() {
+    homeTabPositionStream = Geolocator.getPositionStream(
+            desiredAccuracy: LocationAccuracy.bestForNavigation,
+            distanceFilter: 4)
+        .listen((Position position) {
+      currentPosition = position;
 
 //  bool isAvailable = false;
-    // bool isAvailable;
-    if (isAvailable) {
-      Geofire.setLocation(
-          currentFirebaseUser.uid, position.latitude, position.longitude);
-    }
+      // bool isAvailable;
+      if (isAvailable) {
+        Geofire.setLocation(
+            currentFirebaseUser.uid, position.latitude, position.longitude);
+      }
 
-    LatLng pos = LatLng(position.latitude, position.longitude);
-    // var mapController;
-    mapController.animateCamera(CameraUpdate.newLatLng(pos));
-  });
+      LatLng pos = LatLng(position.latitude, position.longitude);
+      // var mapController;
+      mapController.animateCamera(CameraUpdate.newLatLng(pos));
+    });
+  }
 }
-
-// }

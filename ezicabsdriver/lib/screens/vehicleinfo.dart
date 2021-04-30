@@ -2,6 +2,7 @@ import 'package:ezicabsdriver/brand_colors.dart';
 import 'package:ezicabsdriver/globalvariabels.dart';
 import 'package:ezicabsdriver/screens/mainpage.dart';
 import 'package:ezicabsdriver/widgets/TaxiButton.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +25,8 @@ class VehicleInfoPage extends StatelessWidget {
   var carModelController = TextEditingController();
   var carColorController = TextEditingController();
   var vehicleNumberController = TextEditingController();
+
+  // User currentFirebaseUser;
 
   void updateProfile(context) {
     String id = currentFirebaseUser.uid;

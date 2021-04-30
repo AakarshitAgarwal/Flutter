@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:EziCabs/brand_colors.dart';
 import 'package:EziCabs/datamodels/directiondetails.dart';
+import 'package:EziCabs/datamodels/nearbydriver.dart';
 import 'package:EziCabs/dataprovider/appdata.dart';
 import 'package:EziCabs/helpers/helpermethods.dart';
+import 'package:EziCabs/helpers/firehelper.dart';
 import 'package:EziCabs/screens/searchpage.dart';
 import 'package:EziCabs/globalvariable.dart';
 import 'package:EziCabs/styles/styles.dart';
@@ -20,6 +22,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:EziCabs/widgets/TaxiButton.dart';
 import 'dart:io';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 
 class MainPage extends StatefulWidget {
   static const String id = 'mainpage';
@@ -51,6 +54,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   bool drawerCanOpen = true;
 
+  bool nearbyDriversKeysLoaded = false;
+
   DatabaseReference rideRef;
 
   void setupPositionLocator() async {
@@ -59,12 +64,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     currentPosition = position;
 
     LatLng pos = LatLng(position.latitude, position.longitude);
-    CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
+    CameraPosition cp = new CameraPosition(target: pos, zoom: 30);
     mapController.animateCamera(CameraUpdate.newCameraPosition(cp));
 
     String address =
         await HelperMethods.findCordinateAddress(position, context);
     print("your address--------------------------------------" + address);
+
+    startGeofireListener();
   }
 
   void showDetailSheet() async {
@@ -98,19 +105,20 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   //   });
   // }
 
-  // void createMarker(){
-  //   if(nearbyIcon == null){
-
-  //     ImageConfiguration imageConfiguration = createLocalImageConfiguration(context, size: Size(2,2));
-  //     BitmapDescriptor.fromAssetImage(
-  //         imageConfiguration, (Platform.isIOS)
-  //         ? 'images/car_ios.png'
-  //         : 'images/car_android.png'
-  //     ).then((icon){
-  //       nearbyIcon = icon;
-  //     });
-  //   }
-  // }
+  void createMarker() {
+    if (nearbyIcon == null) {
+      ImageConfiguration imageConfiguration =
+          createLocalImageConfiguration(context, size: Size(2, 2));
+      BitmapDescriptor.fromAssetImage(
+              imageConfiguration,
+              (Platform.isIOS)
+                  ? 'images/car_ios.png'
+                  : 'images/car_android.png')
+          .then((icon) {
+        nearbyIcon = icon;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -121,6 +129,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    createMarker();
     return Scaffold(
         key: scaffoldkey,
         drawer: Container(
@@ -829,6 +838,56 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
   }
 
+  void startGeofireListener() {
+    Geofire.initialize('driversAvailable');
+    Geofire.queryAtLocation(
+            currentPosition.latitude, currentPosition.longitude, 1)
+        .listen((map) {
+      print(map);
+      if (map != null) {
+        var callBack = map['callBack'];
+
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+            NearbyDriver nearbyDriver = NearbyDriver();
+            nearbyDriver.key = map['key'];
+            nearbyDriver.latitude = map['latitude'];
+            nearbyDriver.longitude = map['longitude'];
+            FireHelper.nearbyDriverList.add(nearbyDriver);
+
+            if (nearbyDriversKeysLoaded) {
+              updateDriversOnMap();
+            }
+            break;
+
+          case Geofire.onKeyExited:
+            FireHelper.removeFromList(map['key']);
+            updateDriversOnMap();
+            break;
+
+          case Geofire.onKeyMoved:
+            // Update your key's location
+
+            NearbyDriver nearbyDriver = NearbyDriver();
+            nearbyDriver.key = map['key'];
+            nearbyDriver.latitude = map['latitude'];
+            nearbyDriver.longitude = map['longitude'];
+
+            FireHelper.updateNearbyLocation(nearbyDriver);
+            updateDriversOnMap();
+            break;
+
+          case Geofire.onGeoQueryReady:
+            nearbyDriversKeysLoaded = true;
+            updateDriversOnMap();
+            // print('firehelper lenght: ${FireHelper.nearbyDriverList.length}');
+            // print(map['result']);
+            break;
+        }
+      }
+    });
+  }
+
   resetApp() {
     setState(() {
       polylineCoordinates.clear();
@@ -850,6 +909,30 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
 
     setupPositionLocator();
+  }
+
+  void updateDriversOnMap() {
+    setState(() {
+      _Markers.clear();
+    });
+
+    Set<Marker> tempMarkers = Set<Marker>();
+
+    for (NearbyDriver driver in FireHelper.nearbyDriverList) {
+      LatLng driverPosition = LatLng(driver.latitude, driver.longitude);
+      Marker thisMarker = Marker(
+        markerId: MarkerId('driver${driver.key}'),
+        position: driverPosition,
+        icon: nearbyIcon,
+        rotation: HelperMethods.generateRandomNumber(360),
+      );
+
+      tempMarkers.add(thisMarker);
+    }
+
+    setState(() {
+      _Markers = tempMarkers;
+    });
   }
 
   void createRideRequest() {
@@ -973,80 +1056,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   // });
 
 /*
-void startGeofireListener() {
-    
-    Geofire.initialize('driversAvailable');
-    Geofire.queryAtLocation(currentPosition.latitude, currentPosition.longitude, 20).listen((map) {
 
-      if (map != null) {
-        var callBack = map['callBack'];
 
-        switch (callBack) {
-          case Geofire.onKeyEntered:
 
-            NearbyDriver nearbyDriver = NearbyDriver();
-            nearbyDriver.key = map['key'];
-            nearbyDriver.latitude = map['latitude'];
-            nearbyDriver.longitude = map['longitude'];
-            FireHelper.nearbyDriverList.add(nearbyDriver);
-
-            if(nearbyDriversKeysLoaded){
-              updateDriversOnMap();
-            }
-            break;
-
-          case Geofire.onKeyExited:
-            FireHelper.removeFromList(map['key']);
-            updateDriversOnMap();
-            break;
-
-          case Geofire.onKeyMoved:
-          // Update your key's location
-
-            NearbyDriver nearbyDriver = NearbyDriver();
-            nearbyDriver.key = map['key'];
-            nearbyDriver.latitude = map['latitude'];
-            nearbyDriver.longitude = map['longitude'];
-
-            FireHelper.updateNearbyLocation(nearbyDriver);
-            updateDriversOnMap();
-            break;
-
-          case Geofire.onGeoQueryReady:
-
-            nearbyDriversKeysLoaded = true;
-            updateDriversOnMap();
-            break;
-        }
-      }
-    });
-  }
-
-  void updateDriversOnMap(){
-    setState(() {
-      _Markers.clear();
-    });
-
-    Set<Marker> tempMarkers = Set<Marker>();
-
-    for (NearbyDriver driver in FireHelper.nearbyDriverList){
-
-      LatLng driverPosition = LatLng(driver.latitude, driver.longitude);
-      Marker thisMarker = Marker(
-        markerId: MarkerId('driver${driver.key}'),
-        position: driverPosition,
-        icon: nearbyIcon,
-        rotation: HelperMethods.generateRandomNumber(360),
-      );
-
-      tempMarkers.add(thisMarker);
-    }
-
-    setState(() {
-      _Markers = tempMarkers;
-    });
-
-  }
 
 
 

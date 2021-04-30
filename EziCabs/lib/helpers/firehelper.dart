@@ -1,25 +1,21 @@
-// import 'package:cab_rider/datamodels/nearbydriver.dart';
+import 'package:EziCabs/datamodels/nearbydriver.dart';
 
-// class FireHelper{
+class FireHelper {
+  static List<NearbyDriver> nearbyDriverList = [];
 
-//   static List<NearbyDriver> nearbyDriverList = [];
+  static void removeFromList(String key) {
+    int index = nearbyDriverList.indexWhere((element) => element.key == key);
 
-//   static void removeFromList(String key){
+    if (nearbyDriverList.length > 0) {
+      nearbyDriverList.removeAt(index);
+    }
+  }
 
-//     int index = nearbyDriverList.indexWhere((element) => element.key == key);
+  static void updateNearbyLocation(NearbyDriver driver) {
+    int index =
+        nearbyDriverList.indexWhere((element) => element.key == driver.key);
 
-//     if(nearbyDriverList.length > 0){
-//       nearbyDriverList.removeAt(index);
-//     }
-//   }
-
-//   static void updateNearbyLocation(NearbyDriver driver){
-
-//     int index = nearbyDriverList.indexWhere((element) => element.key == driver.key);
-
-//     nearbyDriverList[index].longitude = driver.longitude;
-//     nearbyDriverList[index].latitude = driver.latitude;
-
-//   }
-
-// }
+    nearbyDriverList[index].longitude = driver.longitude;
+    nearbyDriverList[index].latitude = driver.latitude;
+  }
+}
